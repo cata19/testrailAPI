@@ -2,34 +2,37 @@ from pprint import pprint
 from jira import JIRA
 from testrail import *
 from details import user, password, jiraEmail, token
-import json
 
+# Testrail Credentials
 client = APIClient('https://rosalindai.testrail.io/')
 client.user = user
 client.password = password
+
+# Jira Credentials
 jira = JIRA('https://rosalind.atlassian.net', basic_auth=(jiraEmail, token),
             options={'headers': {"Accept": "application/json"}})
 
 # Set sprint id
-sprint_id = 49
+sprint_id = 49  # jira sprint id
+project_id = 2  # testrail project id
 
-# Get Name for New Sprint
+# Get Name for New Sprint from Jira
 sprint = jira.sprint(sprint_id)
 pprint(sprint.name)
 
-# Create test suite for current sprint
-client.send_post('add_suite/2', {'name': sprint.name, 'description': 'Created using automation PLEASE DELETE'})
+# Create test suite for current sprint inside Testrail
+client.send_post(f'add_suite/{project_id}', {'name': sprint.name, 'description': 'Retro Example'})
 
-# Getting suites as [list] to get the suite id and create a section
-suites = client.send_get('get_suites/2')
+# Getting a list of test suites to get the newest suite id in order to create a section inside the test suite
+suites = client.send_get(f'get_suites/{project_id}')
 suite_id = suites[len(suites) - 1]['id']
 # print(suite_id)
 
-# Creating a section for the test suite
-client.send_post('add_section/2', {'name': 'Automated Test Cases', 'suite_id': suite_id})
+# Creating a section for the test suite in Testrail
+client.send_post(f'add_section/{project_id}', {'name': 'Automated Test Cases', 'suite_id': suite_id})
 
-# Getting section id to add test cases
-sections = client.send_get(f'get_sections/2&suite_id={suite_id}')
+# Getting the first section id to add test cases
+sections = client.send_get(f'get_sections/{project_id}&suite_id={suite_id}')
 section_automated = sections['sections'][0]
 section_id = section_automated.get('id')
 

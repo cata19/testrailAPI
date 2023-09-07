@@ -2,16 +2,18 @@ from pprint import pprint
 from jira import JIRA
 from testrail import *
 from details import user, password, jiraEmail, token
-import json
+import sys
 
 client = APIClient('https://rosalindai.testrail.io/')
 client.user = user
 client.password = password
+
 jira = JIRA('https://rosalind.atlassian.net', basic_auth=(jiraEmail, token),
             options={'headers': {"Accept": "application/json"}})
 
 # Set sprint id & project id
-sprint_id = 28
+# sprint_id = 29
+sprint_id = sys.argv[1]
 project_id = 3
 
 # Get Name for New Sprint
@@ -19,7 +21,9 @@ sprint = jira.sprint(sprint_id)
 pprint(sprint.name)
 
 # Create test suite for current sprint
-client.send_post(f'add_suite/{project_id}', {'name': sprint.name, 'description': 'Created using automation PLEASE DELETE'})
+client.send_post(f'add_suite/{project_id}', {'name': sprint.name, 'description': 'RETRO: Created using automation '
+                                                                                 'PLEASE '
+                                                                                 'DELETE'})
 
 # Getting suites as [list] to get the suite id and create a section
 suites = client.send_get(f'get_suites/{project_id}')
